@@ -1,35 +1,36 @@
 #!/usr/bin/env bash
 # dot: Fast access to your dotfiles.
 
-set -e
+set -euo pipefail
 
-DOTFILES_DIR="$HOME/dotfiles"
+DOTFILES_DIR="${DOTFILES:-$HOME/dotfiles}"
 
 usage() {
-    echo "Usage: dot <command>"
-    echo ""
-    echo "Commands:"
-    echo "  cd      Go to the dotfiles directory"
-    echo "  edit    Open dotfiles in VS Code"
-    echo "  reload  Source .zshrc"
-    echo "  install Run the install script"
+  echo "Usage: dot <command>"
+  echo ""
+  echo "Commands:"
+  echo "  cd      Go to the dotfiles directory"
+  echo "  edit    Open dotfiles in VS Code"
+  echo "  reload  Source .zshrc"
+  echo "  install Run the install script"
 }
 
-case "$1" in
-    cd)
-        cd "$DOTFILES_DIR"
-        ;;
-    edit)
-        code "$DOTFILES_DIR"
-        ;;
-    reload)
-        source "$HOME/.zshrc"
-        echo "✅ Zsh configuration reloaded."
-        ;;
-    install)
-        cd "$DOTFILES_DIR" && ./install
-        ;;
-    *)
-        usage
-        ;;
+case "${1:-}" in
+  cd)
+    cd "$DOTFILES_DIR"
+    ;;
+  edit)
+    code "$DOTFILES_DIR"
+    ;;
+  reload)
+    # shellcheck source=/dev/null
+    source "$HOME/.zshrc"
+    echo "✅ Zsh configuration reloaded."
+    ;;
+  install)
+    cd "$DOTFILES_DIR" && ./install
+    ;;
+  *)
+    usage
+    ;;
 esac

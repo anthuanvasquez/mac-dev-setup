@@ -1,18 +1,32 @@
 #!/usr/bin/env bash
 # doctor: Diagnose the current machine setup and environment.
 
-set -e
+set -euo pipefail
 
 echo "🔍 Running Environment Diagnostics..."
 
 check_tool() {
-    local tool="$1"
-    local description="$2"
-    if command -v "$tool" &>/dev/null; then
-        echo "   [✅] $tool is installed ($description)"
-    else
-        echo "   [❌] $tool NOT found ($description)"
-    fi
+  local tool="$1"
+  local description="$2"
+  if command -v "$tool" &>/dev/null; then
+    echo "   [✅] $tool is installed ($description)"
+  else
+    echo "   [❌] $tool NOT found ($description)"
+  fi
+}
+
+detect_os() {
+  case "$(uname -s)" in
+    Darwin) echo "macOS" ;;
+    Linux)
+      if grep -qE "(Microsoft|WSL)" /proc/version 2>/dev/null; then
+        echo "WSL"
+      else
+        echo "Linux"
+      fi
+      ;;
+    *) echo "Unknown" ;;
+  esac
 }
 
 echo "--- Core Tools ---"
@@ -37,6 +51,6 @@ check_tool "kubectl" "Kubernetes control"
 check_tool "gh" "GitHub CLI"
 
 echo "--- System Health ---"
-echo "   [✅] Running on macOS"
+echo "   [✅] Running on $(detect_os)"
 
 echo "✨ Diagnostics complete."

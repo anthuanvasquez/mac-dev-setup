@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 # update: Keep the entire machine in sync.
 
-set -e
+set -euo pipefail
 
-DOTFILES_DIR="$HOME/dotfiles"
+DOTFILES_DIR="${DOTFILES:-$HOME/dotfiles}"
 
 echo "🔄 Updating dotfiles environment..."
 
 # 1. Update dotfiles repo
 if [ -d "$DOTFILES_DIR/.git" ]; then
   echo "   [GIT] Pulling latest changes..."
-  cd "$DOTFILES_DIR" && git pull --rebase origin master
+  cd "$DOTFILES_DIR" && git pull --rebase origin "$(git rev-parse --abbrev-ref HEAD)"
 else
   echo "   [SKIP] dotfiles repo is not managed by git"
 fi
