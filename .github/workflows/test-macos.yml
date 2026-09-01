@@ -20,7 +20,7 @@ jobs:
         uses: Homebrew/actions/setup-homebrew@master
 
       - name: Grant execution permissions
-        run: chmod +x setup install scripts/* os/* bin/* modules/*/install.sh
+        run: chmod +x setup install scripts/* os/* bin/* modules/*/install.sh lib/*.sh
 
       - name: Install Homebrew packages
         run: |
@@ -35,7 +35,7 @@ jobs:
       - name: Apply macOS settings
         run: |
           echo "⚙️ Applying macOS settings (CI-safe)..."
-          ./os/macos.sh
+          ./os/setup-macos.sh
 
       - name: Run Module Installers
         run: |

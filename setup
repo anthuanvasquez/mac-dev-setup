@@ -1,28 +1,29 @@
 #!/usr/bin/env bash
 # setup: The one-command setup entry point.
-# curl -fsSL https://raw.githubusercontent.com/user/dotfiles/master/setup | bash
+# curl -fsSL https://raw.githubusercontent.com/anthuanvasquez/dotfiles/master/setup | bash
 
-set -e
+set -euo pipefail
 
-# Define directories
-DOTFILES_DIR="$HOME/dotfiles"
+REPO_URL="https://github.com/anthuanvasquez/dotfiles.git"
+DOTFILES_DIR="${DOTFILES_DIR:-$HOME/dotfiles}"
 
-# 1. Install Xcode Command Line Tools
-if ! xcode-select -p &>/dev/null; then
-  echo "🛠️ Installing Xcode Command Line Tools..."
+# 1. Install Xcode Command Line Tools on macOS
+if [[ "$OSTYPE" == "darwin"* ]] && ! xcode-select -p &>/dev/null; then
+  echo "🛠️  Installing Xcode Command Line Tools..."
   xcode-select --install
 fi
 
 # 2. Clone repo if not already there
 if [ ! -d "$DOTFILES_DIR" ]; then
   echo "🚀 Cloning dotfiles..."
-  git clone https://github.com/anthuanvasquez/dotfiles.git "$DOTFILES_DIR"
+  git clone "$REPO_URL" "$DOTFILES_DIR"
 fi
 
 cd "$DOTFILES_DIR"
 
 # 3. Give execution permissions
-chmod +x setup  install scripts/* os/* bin/* modules/*/install.sh 2>/dev/null || true
+echo "🔧 Ensuring executable permissions..."
+chmod +x setup install scripts/* os/* bin/* modules/*/install.sh 2>/dev/null || true
 
 # 4. Launch installer
 echo "📦 Starting installation..."

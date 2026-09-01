@@ -1,39 +1,47 @@
 #!/usr/bin/env bash
 # link-dotfiles: Create symbolic links from dotfiles/home to $HOME
 
-set -e
+set -euo pipefail
 
 DOTFILES_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 HOME_DIR="$HOME"
 
-echo "🔗 Linking dotfiles..."
+# shellcheck source=lib/utils.sh
+source "$DOTFILES_ROOT/lib/utils.sh"
 
-# Function to create a symlink
+info "Linking dotfiles..."
+
 link_file() {
-    local src="$1"
-    local dst="$2"
+  local src="$1"
+  local dst="$2"
 
-    mkdir -p "$(dirname "$dst")"
+  mkdir -p "$(dirname "$dst")"
 
-    if [ -L "$dst" ]; then
-        echo "   [SKIP] Link already exists: $dst"
-    elif [ -f "$dst" ] || [ -d "$dst" ]; then
-        echo "   [BACKUP] $dst exists. Backing up to $dst.bak"
-        mv "$dst" "$dst.bak"
-        ln -s "$src" "$dst"
+  if [[ -L "$dst" ]]; then
+    local current_target
+    current_target="$(readlink "$dst")"
+    if [[ "$current_target" == "$src" ]]; then
+      info "Already linked: $dst"
     else
-        echo "   [LINK] Creating: $dst -> $src"
-        ln -s "$src" "$dst"
+      warn "Updating existing link: $dst -> $src"
+      rm "$dst"
+      ln -s "$src" "$dst"
     fi
+  elif [[ -e "$dst" ]]; then
+    warn "$dst exists. Backing up to $dst.bak"
+    rm -rf "$dst.bak"
+    mv "$dst" "$dst.bak"
+    ln -s "$src" "$dst"
+  else
+    info "Creating: $dst -> $src"
+    ln -s "$src" "$dst"
+  fi
 }
 
-# Find all files in home directory (including hidden)
-# Exclude .DS_Store
-find "$DOTFILES_ROOT/home" -type f -not -name ".DS_Store" | while read -r src; do
-    # Calculate relative path from home/
-    rel_path="${src#$DOTFILES_ROOT/home/}"
-    dst="$HOME_DIR/$rel_path"
-    link_file "$src" "$dst"
-done
+while IFS= read -r src; do
+  rel_path="${src#$DOTFILES_ROOT/home/}"
+  dst="$HOME_DIR/$rel_path"
+  link_file "$src" "$dst"
+done < <(find "$DOTFILES_ROOT/home" -type f -not -name ".DS_Store")
 
-echo "✅ Linking complete."
+success "Linking complete."

@@ -1,39 +1,65 @@
 #!/usr/bin/env bash
 # install: Orchestrator for setting up the environment.
+#
+# Flow:
+#   1. Detect OS.
+#   2. Create symlinks (cross-platform).
+#   3. Install packages (OS-aware).
+#   4. Apply OS-specific settings (only what is supported).
+#   5. Run module installers.
 
-set -e
+set -euo pipefail
 
-# Setup base path
 DOTFILES_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cd "$DOTFILES_ROOT"
+export DOTFILES_ROOT
+
+# shellcheck source=lib/utils.sh
+source "$DOTFILES_ROOT/lib/utils.sh"
+
+# 1. Detect OS first
+OS="$(detect_os)"
 
 echo "🎯 Environment Orchestrator"
+echo "   OS: $OS"
 
-# 1. Create Symlinks
-./scripts/link-dotfiles
+case "$OS" in
+  macos|wsl|linux)
+    info "OS detected: $OS"
+    ;;
+  *)
+    error "Unsupported OS: $OS"
+    exit 1
+    ;;
+esac
 
-# 2. Package Installation
-echo "🍺 Setting up Homebrew..."
-if ! command -v brew &>/dev/null; then
-  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-  eval "$(/opt/homebrew/bin/brew shellenv)"
+# 2. Create symlinks (safe on all platforms)
+info "Creating symlinks..."
+"$DOTFILES_ROOT/scripts/link-dotfiles"
+
+# 3. Install packages using the OS-appropriate package manager
+info "Installing packages..."
+"$DOTFILES_ROOT/scripts/install-packages"
+
+# 4. Apply OS-specific settings (only what is supported for the current OS)
+if [[ "$OS" == "macos" ]]; then
+  info "Applying macOS settings..."
+  "$DOTFILES_ROOT/os/setup-macos.sh"
+elif [[ "$OS" == "wsl" ]]; then
+  warn "WSL setup is not yet implemented. Skipping OS-specific configuration."
+else
+  warn "Linux setup is not yet implemented. Skipping OS-specific configuration."
 fi
 
-echo "📦 Installing packages from Brewfile..."
-./scripts/install-packages
-
-# 3. Apply settings
-echo "⚙️ Applying macOS settings..."
-./os/macos.sh
-
-# 4. Modules Setup (auto-discovery)
-echo "🧩 Configuring Modules..."
-
-for module_script in modules/*/install.sh; do
-    module_name="$(basename "$(dirname "$module_script")")"
-    module_name_upper="$(echo "$module_name" | tr '[:lower:]' '[:upper:]')"
-    echo "   [$module_name_upper] Running installer..."
-    bash "$module_script"
+# 5. Module setup (auto-discovery)
+info "Configuring modules..."
+for module_script in "$DOTFILES_ROOT/modules"/*/install.sh; do
+  if [[ ! -f "$module_script" ]]; then
+    continue
+  fi
+  module_name="$(basename "$(dirname "$module_script")")"
+  module_name_upper="$(echo "$module_name" | tr '[:lower:]' '[:upper:]')"
+  echo "   [$module_name_upper] Running installer..."
+  bash "$module_script"
 done
 
-echo "✨ All done! Open a new shell to enjoy your setup."
+success "All done! Open a new shell to enjoy your setup."
