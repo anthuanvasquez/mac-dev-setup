@@ -1,6 +1,5 @@
 # Taps
 tap "oven-sh/bun"
-tap "gentleman-programming/tap"
 
 # Formulas
 brew "zsh"
@@ -16,14 +15,11 @@ brew "fd"
 brew "sd"
 brew "bat"
 brew "tldr"
-brew "lazygit"
-brew "lazydocker"
 brew "gh"
 brew "tree"
 brew "fnm"
 brew "oven-sh/bun/bun"
 brew "gentleman-programming/tap/engram"
-brew "gemini-cli"
 brew "pyenv"
 brew "rclone"
 brew "git-lfs"
