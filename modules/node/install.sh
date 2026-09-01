@@ -1,20 +1,32 @@
 #!/usr/bin/env bash
+# modules/node/install.sh: Node.js setup via fnm and corepack.
 
-echo "Setting up Node.js environment..."
+set -euo pipefail
+
+DOTFILES_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+# shellcheck source=lib/utils.sh
+source "$DOTFILES_ROOT/lib/utils.sh"
+
+info "Setting up Node.js environment..."
+
+if ! command -v fnm &>/dev/null; then
+  warn "fnm not found. Skipping Node setup."
+  exit 0
+fi
 
 # Evaluate fnm env so we can use it in the script
 eval "$(fnm env)"
 
-echo "Installing Node.js v22.22.2..."
+info "Installing Node.js v22.22.2..."
 fnm install 22.22.2
 fnm use 22.22.2
 fnm default 22.22.2
 
-echo "Enabling Corepack for modern package managers..."
+info "Enabling Corepack for modern package managers..."
 corepack enable pnpm
 corepack prepare pnpm@latest --activate
 
-echo "Configuring npm to ignore scripts..."
+info "Configuring npm to ignore scripts..."
 npm config set ignore-scripts true
 
-echo "Node.js environment setup complete!"
+success "Node.js environment setup complete!"

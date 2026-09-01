@@ -1,10 +1,17 @@
 #!/usr/bin/env bash
+# modules/rclone/install.sh: Verify rclone is available.
 
-echo "Setting up rclone..."
+set -euo pipefail
+
+DOTFILES_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+# shellcheck source=lib/utils.sh
+source "$DOTFILES_ROOT/lib/utils.sh"
+
+info "Setting up rclone..."
 
 if ! command -v rclone &>/dev/null; then
-    echo "   [SKIP] rclone not found. Install via: brew install rclone"
-    exit 0
+  warn "rclone not found. Install via: brew install rclone"
+  exit 0
 fi
 
-echo "✅ rclone is ready. Configure remotes with: rclone config"
+success "rclone is ready. Configure remotes with: rclone config"

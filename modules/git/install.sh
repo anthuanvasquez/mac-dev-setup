@@ -2,13 +2,19 @@
 # modules/git/install.sh: Git LFS setup.
 # Static config lives in home/.gitconfig (symlinked).
 
-set -e
+set -euo pipefail
 
-echo "📦 Configuring Git..."
+DOTFILES_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+# shellcheck source=lib/utils.sh
+source "$DOTFILES_ROOT/lib/utils.sh"
+
+info "Configuring Git..."
 
 if command -v git-lfs &>/dev/null; then
-    echo "   Setting up Git LFS..."
-    git lfs install
+  info "Setting up Git LFS..."
+  git lfs install
+else
+  warn "git-lfs not found. Skipping."
 fi
 
-echo "✅ Git configuration complete."
+success "Git configuration complete."

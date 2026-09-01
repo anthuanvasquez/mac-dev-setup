@@ -1,14 +1,25 @@
 #!/usr/bin/env bash
+# modules/python/install.sh: Python setup via pyenv.
 
-echo "Setting up Python environment..."
+set -euo pipefail
 
-# The pyenv binary is installed via brew, need to export its path for the script
+DOTFILES_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+# shellcheck source=lib/utils.sh
+source "$DOTFILES_ROOT/lib/utils.sh"
+
+info "Setting up Python environment..."
+
+if ! command -v pyenv &>/dev/null; then
+  warn "pyenv not found. Skipping Python setup."
+  exit 0
+fi
+
 export PYENV_ROOT="$HOME/.pyenv"
 export PATH="$PYENV_ROOT/bin:$PATH"
 eval "$(pyenv init -)"
 
-echo "Installing Python 3.12..."
+info "Installing Python 3.12..."
 pyenv install -s 3.12
 pyenv global 3.12
 
-echo "Python environment setup complete!"
+success "Python environment setup complete!"
