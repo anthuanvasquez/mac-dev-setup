@@ -1,6 +1,0 @@
-{
-  "lastChangelogVersion": "0.66.1",
-  "theme": "tokyo-night",
-  "defaultProvider": "github-copilot",
-  "defaultModel": "claude-haiku-4.5"
-}
