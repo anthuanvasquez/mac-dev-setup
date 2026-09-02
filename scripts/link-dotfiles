@@ -28,9 +28,9 @@ link_file() {
       ln -s "$src" "$dst"
     fi
   elif [[ -e "$dst" ]]; then
-    warn "$dst exists. Backing up to $dst.bak"
-    rm -rf "$dst.bak"
-    mv "$dst" "$dst.bak"
+    local backup="$dst.bak.$(date +%Y%m%d%H%M%S)"
+    warn "$dst exists. Backing up to $backup"
+    mv "$dst" "$backup"
     ln -s "$src" "$dst"
   else
     info "Creating: $dst -> $src"
