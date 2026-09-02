@@ -1,5 +1,7 @@
 # Taps
 tap "oven-sh/bun"
+tap "jandedobbeleer/oh-my-posh"
+tap "gentleman-programming/tap"
 
 # Formulas
 brew "zsh"
