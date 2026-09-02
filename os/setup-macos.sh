@@ -29,13 +29,20 @@ defaults write com.apple.finder AppleShowAllFiles -bool true
 # Disable the warning when changing a file extension
 defaults write com.apple.finder FXEnableExtensionChangeWarning -bool false
 
-# Create Dock spacers (skip in CI — no Dock)
+# Create Dock spacers only if they don't already exist (skip in CI — no Dock)
 if [[ "$IS_CI" == "false" ]]; then
-    echo "Creating Dock spacers..."
+  SPACER='{tile-type = "spacer-tile";}'
+  CURRENT_DOCK="$(defaults read com.apple.dock persistent-apps 2>/dev/null || true)"
+
+  if echo "$CURRENT_DOCK" | grep -qF "$SPACER"; then
+    echo "   [INFO] Dock spacers already present. Skipping."
+  else
+    echo "   [INFO] Creating Dock spacers..."
     defaults write com.apple.dock persistent-apps -array-add '{"tile-type"="spacer-tile";}'
     defaults write com.apple.dock persistent-apps -array-add '{"tile-type"="spacer-tile";}'
     defaults write com.apple.dock persistent-apps -array-add '{"tile-type"="spacer-tile";}'
     killall Dock
+  fi
 fi
 
-echo "macOS defaults configured. Some changes require a logout/restart to take effect."
+echo "✅ macOS defaults configured. Some changes require a logout/restart to take effect."
